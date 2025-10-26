@@ -30,7 +30,7 @@ const httpServer = createServer(app);
 
 // Enable CORS for frontend communication
 app.use(cors({
-  origin: "*", // Temporarily allow all origins for testing
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true
 }));
 
@@ -51,7 +51,7 @@ app.use((req, res, next) => {
  */
 const io = new Server(httpServer, {
   cors: {
-    origin: "*", // Temporarily allow all origins for testing
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
     methods: ['GET', 'POST'],
     credentials: true
   }
