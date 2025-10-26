@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+  
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 font-medium;
+  }
+  
+  .btn-secondary {
+    @apply px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all duration-200;
+  }
+  
+  .card {
+    @apply bg-gray-800 rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl border border-gray-700;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Supabase Auth UI Custom Styles */
+.supabase-auth-container {
+  @apply space-y-4;
+}
+
+.supabase-auth-container button[type="submit"] {
+  @apply w-full py-3 rounded-lg font-medium transition-all duration-200;
+}
+
+.supabase-auth-container input {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all duration-200;
+}
+
+.supabase-auth-container label {
+  @apply block text-sm font-medium text-gray-700 mb-1.5;
+}
+
+.supabase-auth-container a {
+  @apply text-primary-600 hover:text-primary-700 transition-colors;
+}
+
+.supabase-auth-container .supabase-auth-ui_ui-message {
+  @apply p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm;
+}
+
+.supabase-auth-container .supabase-auth-ui_ui-divider {
+  @apply my-6 flex items-center text-gray-500 text-sm;
+}
+
+.supabase-auth-container .supabase-auth-ui_ui-divider::before,
+.supabase-auth-container .supabase-auth-ui_ui-divider::after {
+  @apply flex-1 border-t border-gray-300;
+}
+
+.supabase-auth-container .supabase-auth-ui_ui-divider::before {
+  @apply mr-4;
+}
+
+.supabase-auth-container .supabase-auth-ui_ui-divider::after {
+  @apply ml-4;
+}
+
+/* Social Auth Buttons */
+.supabase-auth-container button[class*="social"] {
+  @apply bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors;
+}
+
+/* Forgot Password Link */
+.supabase-auth-container .supabase-auth-ui_ui-anchor {
+  @apply text-sm text-primary-600 hover:text-primary-700 font-medium;
+}
