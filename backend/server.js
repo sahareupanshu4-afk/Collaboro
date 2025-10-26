@@ -81,6 +81,7 @@ const videoRooms = new Map();
  */
 io.on('connection', (socket) => {
   console.log('✅ Client connected:', socket.id);
+  console.log('Connection origin:', socket.handshake.headers.origin);
 
   /**
    * Handle user authentication and registration
