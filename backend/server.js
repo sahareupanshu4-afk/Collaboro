@@ -37,6 +37,12 @@ app.use(cors({
 // Parse JSON request bodies
 app.use(express.json());
 
+// Log all incoming requests
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.url} from ${req.get('origin') || 'unknown'}`);
+  next();
+});
+
 // ==================== SOCKET.IO INITIALIZATION ====================
 
 /**
