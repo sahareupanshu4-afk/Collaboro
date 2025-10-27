@@ -1,23 +1,28 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Users, X } from 'lucide-react';
+import { Send, Users, X, Loader } from 'lucide-react';
 import { socketService } from '../services/socketService';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../config/supabase';
 
 const Chat = ({ workspaceId, isOpen, onClose }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef(null);
   const { user, profile } = useAuth();
 
+  // Load messages from database and listen for new ones
   useEffect(() => {
     if (isOpen && workspaceId) {
+      loadMessagesFromDatabase();
       // Join chat room
       socketService.joinChatRoom(workspaceId);
 
       // Listen for messages
       const handleMessage = (data) => {
+        saveMessageToDatabase(data);
         setMessages((prev) => [...prev, data]);
       };
 
@@ -57,6 +62,52 @@ const Chat = ({ workspaceId, isOpen, onClose }) => {
       };
     }
   }, [isOpen, workspaceId]);
+
+  // Load messages from database
+  const loadMessagesFromDatabase = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('workspace_id', workspaceId)
+        .order('created_at', { ascending: true })
+        .limit(100);
+
+      if (error) throw error;
+
+      if (data) {
+        setMessages(data);
+      }
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Save message to database
+  const saveMessageToDatabase = async (messageData) => {
+    try {
+      if (messageData.type === 'system') return; // Don't save system messages
+
+      const { error } = await supabase
+        .from('chat_messages')
+        .insert([{
+          workspace_id: workspaceId,
+          user_id: messageData.userId,
+          username: messageData.username,
+          message: messageData.message,
+          created_at: messageData.timestamp
+        }]);
+
+      if (error) {
+        console.error('Error saving message:', error);
+      }
+    } catch (error) {
+      console.error('Error in saveMessageToDatabase:', error);
+    }
+  };
 
   useEffect(() => {
     scrollToBottom();
@@ -128,8 +179,16 @@ const Chat = ({ workspaceId, isOpen, onClose }) => {
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+            {isLoading && (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <Loader className="w-8 h-8 text-primary-600 animate-spin mx-auto mb-2" />
+                  <p className="text-gray-500">Loading messages...</p>
+                </div>
+              </div>
+            )}
             <AnimatePresence>
-              {messages.map((msg) => (
+              {!isLoading && messages.map((msg) => (
                 <motion.div
                   key={msg.id}
                   initial={{ opacity: 0, y: 20 }}

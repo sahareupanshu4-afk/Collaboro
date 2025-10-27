@@ -66,6 +66,7 @@ import Whiteboard from './Whiteboard';
 import DocumentEditor from './DocumentEditor';
 import UserProfile from './UserProfile';
 import FileUpload from './FileUpload';
+import InvitationManager from './InvitationManager';
 import { supabase } from '../config/supabase';
 
 /**
@@ -103,6 +104,7 @@ const Dashboard = () => {
   const [showWorkspaceInvite, setShowWorkspaceInvite] = useState(false); // Invite modal visibility
   const [workspaceInviteLink, setWorkspaceInviteLink] = useState('');    // Generated invitation link
   const [copiedInvite, setCopiedInvite] = useState(false);               // Invite link copied status
+  const [showInvitationManager, setShowInvitationManager] = useState(false); // Join invitation modal
 
   // Saved content management
   const [showWhiteboardList, setShowWhiteboardList] = useState(false);   // Saved whiteboards list visibility
@@ -1144,6 +1146,19 @@ const Dashboard = () => {
                     Upload and manage files
                   </p>
                 </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowInvitationManager(true)}
+                  className="p-8 bg-gradient-to-br from-indigo-600 to-purple-700 text-white rounded-2xl shadow-lg shadow-indigo-600/30 hover:shadow-2xl hover:shadow-indigo-600/50 transition-all"
+                >
+                  <LinkIcon className="w-12 h-12 mb-4 mx-auto" />
+                  <h3 className="text-xl font-bold mb-2">Join with Invite</h3>
+                  <p className="text-indigo-100 text-sm">
+                    Paste an invitation link to join workspaces or calls
+                  </p>
+                </motion.button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
@@ -2022,6 +2037,12 @@ const Dashboard = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Invitation Manager Modal */}
+      <InvitationManager 
+        isOpen={showInvitationManager} 
+        onClose={() => setShowInvitationManager(false)} 
+      />
     </div>
   );
 };

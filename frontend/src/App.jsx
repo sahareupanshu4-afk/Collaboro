@@ -1,8 +1,10 @@
-import { BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import LandingPage from './components/LandingPage';
+import JoinWorkspace from './components/JoinWorkspace';
+import JoinCall from './components/JoinCall';
 import { useEffect, useState } from 'react';
 
 function AppContent() {
@@ -27,15 +29,18 @@ function AppContent() {
     );
   }
 
-  if (user) {
-    return <Dashboard />;
-  }
-
-  if (showLogin) {
-    return <Login onBack={() => setShowLogin(false)} />;
-  }
-
-  return <LandingPage onSignIn={() => setShowLogin(true)} />;
+  return (
+    <Routes>
+      {/* Public routes for joining via invitation links */}
+      <Route path="/join-workspace" element={<JoinWorkspace />} />
+      <Route path="/join-call" element={<JoinCall />} />
+      
+      {/* Authenticated routes */}
+      <Route path="/" element={
+        user ? <Dashboard /> : showLogin ? <Login onBack={() => setShowLogin(false)} /> : <LandingPage onSignIn={() => setShowLogin(true)} />
+      } />
+    </Routes>
+  );
 }
 
 function App() {

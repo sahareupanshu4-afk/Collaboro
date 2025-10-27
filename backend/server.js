@@ -49,13 +49,35 @@ app.use((req, res, next) => {
 /**
  * Socket.io server instance for real-time communication
  * Configured with CORS to allow frontend connections
+ * Optimized for production with multiple transport options
  */
 const io = new Server(httpServer, {
   cors: {
     origin: process.env.CLIENT_URL || 'http://localhost:5173',
     methods: ['GET', 'POST'],
-    credentials: true
-  }
+    credentials: true,
+    allowEIO3: true
+  },
+  transports: ['websocket', 'polling'],
+  allowUpgrades: true,
+  pingInterval: 25000,
+  pingTimeout: 60000,
+  maxHttpBufferSize: 1e6,
+  connectionStateRecovery: {
+    maxDisconnectionDuration: 2 * 60 * 1000,
+    skipMiddlewares: true,
+  },
+  // Enhanced polling configuration for better compatibility
+  httpCompression: {
+    threshold: 1024
+  },
+  // Increase buffer sizes for long-polling
+  perMessageDeflate: {
+    threshold: 1024
+  },
+  // Additional options for production stability
+  cookie: false,
+  maxHttpBufferSize: 1e7
 });
 
 // ==================== IN-MEMORY DATA STORES ====================
@@ -78,6 +100,16 @@ const chatRooms = new Map();
  */
 const videoRooms = new Map();
 
+// ==================== SOCKET CONNECTION ERROR HANDLER ====================
+
+/**
+ * Handle Socket.io errors before connection
+ * Logs authentication and connection issues
+ */
+io.on('connect_error', (error) => {
+  console.error('❌ Socket.io connection error:', error.message);
+});
+
 // ==================== SOCKET CONNECTION HANDLER ====================
 
 /**
@@ -87,8 +119,10 @@ const videoRooms = new Map();
  * @param {Socket} socket - Socket.io socket instance for this connection
  */
 io.on('connection', (socket) => {
-  console.log('✅ Client connected:', socket.id);
+  const transport = socket.conn.transport.name;
+  console.log('✅ Client connected:', socket.id, `(transport: ${transport})`);
   console.log('Connection origin:', socket.handshake.headers.origin);
+  console.log('User agent:', socket.handshake.headers['user-agent']);
 
   /**
    * Handle user authentication and registration
@@ -420,11 +454,13 @@ app.get('/api/health', (req, res) => {
 /**
  * Start HTTP server and Socket.io
  * Listens on configured PORT or default 8080
+ * Binds to 0.0.0.0 for compatibility with deployment platforms like Render
  */
 const PORT = process.env.PORT || 8080;
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, '0.0.0.0', () => {
   console.log('🖥️  Server started on port', PORT);
   console.log('📡 Socket.io server ready');
+  console.log('🌐 Frontend URL:', process.env.CLIENT_URL || 'http://localhost:5173');
   console.log('Waiting for clients to connect...\n');
   console.log('Commands:');
   console.log('- Press Ctrl+C to stop the server\n');

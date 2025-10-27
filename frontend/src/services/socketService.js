@@ -52,12 +52,18 @@ class SocketService {
     }
 
     // Initialize new Socket.io connection with configuration
+    console.log('🔌 Attempting to connect to:', SERVER_URL);
+    
     this.socket = io(SERVER_URL, {
-      reconnection: true,           // Enable automatic reconnection
-      reconnectionDelay: 1000,     // Initial delay between reconnection attempts
-      reconnectionAttempts: 5,     // Maximum reconnection attempts
-      timeout: 20000,              // Connection timeout in milliseconds
-      transports: ['websocket', 'polling'] // Transport fallbacks
+      reconnection: true,                    // Enable automatic reconnection
+      reconnectionDelay: 1000,              // Initial delay between reconnection attempts
+      reconnectionDelayMax: 5000,           // Max delay between reconnection attempts
+      reconnectionAttempts: 15,             // Maximum reconnection attempts
+      timeout: 20000,                       // Connection timeout in milliseconds
+      transports: ['websocket', 'polling'], // Try WebSocket first, fallback to polling
+      upgrade: true,                        // Allow upgrading from polling to websocket
+      closeOnBeforeunload: true,            // Close connection when page unloads
+      path: '/socket.io/'                   // Explicit socket.io path
     });
 
     /**
@@ -66,7 +72,8 @@ class SocketService {
      */
     this.socket.on('connect', () => {
       this.connected = true;
-      console.log('✅ Connected to server:', this.socket.id);
+      const transport = this.socket.io.engine.transport.name;
+      console.log('✅ Connected to server:', this.socket.id, `(${transport})`);
       
       if (userData) {
         this.socket.emit('user:join', userData);
@@ -91,7 +98,16 @@ class SocketService {
      * @param {Error} error - Connection error object
      */
     this.socket.on('connect_error', (error) => {
-      console.error('❌ Connection error:', error.message);
+      console.error('❌ Connection error:', error);
+      console.error('Error message:', error.message);
+      console.error('Error data:', error.data);
+    });
+
+    /**
+     * Debug: Log transport upgrade attempts
+     */
+    this.socket.on('upgrade', (transport) => {
+      console.log('🔄 Transport upgraded to:', transport.name);
     });
 
     return this.socket;
